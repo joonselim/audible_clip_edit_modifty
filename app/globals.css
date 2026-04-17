@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  background: #000;
+  color: #e6e6e6;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+/* hide scrollbars on text view for a clean mobile feel */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 0.35; transform: scale(0.9); }
+  50%       { opacity: 1;    transform: scale(1); }
+}
+.pulse-dot { animation: pulseDot 1.4s ease-in-out infinite; }
+
+@keyframes fadeSlideInCentered {
+  from { opacity: 0; transform: translate(-50%, 6px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+.fade-in { animation: fadeSlideInCentered .22s ease-out both; }
+
+@keyframes fadeSlideInPlain {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in-plain { animation: fadeSlideInPlain .22s ease-out both; }
+
+@keyframes toastIn {
+  0%   { opacity: 0; transform: translate(-50%, 8px); }
+  15%  { opacity: 1; transform: translate(-50%, 0); }
+  85%  { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -4px); }
+}
+.toast-anim { animation: toastIn 1.8s ease both; }

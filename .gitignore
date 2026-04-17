@@ -1,0 +1,37 @@
+# deps
+node_modules
+.pnp
+.pnp.*
+
+# next
+.next
+out
+
+# build artifacts
+build
+dist
+*.tsbuildinfo
+next-env.d.ts
+
+# env
+.env*.local
+.env.production
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# editor / os
+.DS_Store
+.vscode
+.idea
+
+# vercel
+.vercel
+
+# claude code runtime (local agent config)
+.claude/
+
+# local-only reference material
+audible_screenshots/
