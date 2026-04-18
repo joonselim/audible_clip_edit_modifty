@@ -1,12 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import {
-  formatLongClock,
-  oneSentenceRange,
-  paragraphRange,
-  twoSentenceRange
-} from '@/lib/book'
+import { formatLongClock } from '@/lib/book'
 import type { BookTranscript, ListenBook } from '@/lib/book'
 import {
   MODE_LABEL,
@@ -57,27 +52,19 @@ export function EditClipScreen({
 
   const hasTranscript = book.transcript.hasTranscript
 
-  /* Switching mode re-derives the range from the current end-anchor.
-   * Per spec this is intentionally destructive — manual trims made in
-   * the previous mode are discarded. */
+  /* Each mode has its own canonical length. Pressing a mode pill always
+   * resets the selection to `(range.end - modeDefault, range.end)` so
+   * that the three modes are visibly distinct and easy to return to —
+   * even after the user has manually trimmed the handles. */
+  const MODE_DEFAULT_SECONDS: Record<ClipMode, number> = {
+    'one-sentence': 8,
+    'two-sentences': 15,
+    paragraph: 45
+  }
   const switchMode = (next: ClipMode) => {
     if (next === mode) return
-    if (!hasTranscript) {
-      const seconds = next === 'one-sentence' ? 8 : next === 'two-sentences' ? 15 : 60
-      setRange(r => ({ start: Math.max(0, r.end - seconds), end: r.end }))
-      setMode(next)
-      return
-    }
-    if (next === 'one-sentence') {
-      const r = oneSentenceRange(book.transcript, range.end)
-      setRange({ start: r.start, end: r.end })
-    } else if (next === 'two-sentences') {
-      const r = twoSentenceRange(book.transcript, range.end)
-      setRange({ start: r.start, end: r.end })
-    } else {
-      const r = paragraphRange(book.transcript, range.end)
-      setRange({ start: r.start, end: r.end })
-    }
+    const seconds = MODE_DEFAULT_SECONDS[next]
+    setRange(r => ({ start: Math.max(0, r.end - seconds), end: r.end }))
     setMode(next)
   }
 
