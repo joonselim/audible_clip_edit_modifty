@@ -1,12 +1,12 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import {
-  faultInOurStars,
   formatLongClock,
   oneSentenceRange,
   paragraphRange,
+  prideAndPrejudice,
   twoSentenceRange
 } from '@/lib/book'
 import type { BookTranscript, ListenBook } from '@/lib/book'
@@ -51,14 +51,14 @@ export interface Clip {
 }
 
 const DEFAULT_MODE: ClipMode = 'two-sentences'
-const START_TIME = 60 // inside the transcript window so the demo always has semantic data
+const START_TIME = 47 // lands right at Mrs. Bennet's first line so playback has dialog immediately
 
 /* ----------------------------------------------------------
  * Player
  * ----------------------------------------------------------*/
 
 export function Player() {
-  const book = faultInOurStars
+  const book = prideAndPrejudice
   const { transcript } = book
 
   const [currentTime, setCurrentTime] = useState(START_TIME)
@@ -67,15 +67,47 @@ export function Player() {
   const [clips, setClips] = useState<Clip[]>([])
   const [toastClipId, setToastClipId] = useState<string | null>(null)
   const [editingClipId, setEditingClipId] = useState<string | null>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
-  /* ----- Playback clock ----- */
+  /* ----- Playback clock -----
+   * Real audio: time and play-state are driven by the <audio> element.
+   * Browsers block autoplay without a prior gesture, so if play() is
+   * rejected we fall back to a paused state — the user can tap the
+   * big play button to start. Mocks without audioSrc fall back to a
+   * 1-Hz synthetic clock. */
   useEffect(() => {
+    const a = audioRef.current
+    if (a) {
+      if (isPlaying) {
+        const p = a.play()
+        if (p && typeof p.catch === 'function') {
+          p.catch(() => setIsPlaying(false))
+        }
+      } else {
+        a.pause()
+      }
+      return
+    }
     if (!isPlaying) return
     const id = window.setInterval(() => {
       setCurrentTime(t => Math.min(t + 1, book.chapter.duration))
     }, 1000)
     return () => window.clearInterval(id)
   }, [isPlaying, book.chapter.duration])
+
+  useEffect(() => {
+    const a = audioRef.current
+    if (!a) return
+    a.currentTime = START_TIME
+    const onTime = () => setCurrentTime(a.currentTime)
+    const onEnded = () => setIsPlaying(false)
+    a.addEventListener('timeupdate', onTime)
+    a.addEventListener('ended', onEnded)
+    return () => {
+      a.removeEventListener('timeupdate', onTime)
+      a.removeEventListener('ended', onEnded)
+    }
+  }, [])
 
   /* ----- Clip computation ----- */
   const computeClipRange = useCallback(
@@ -159,6 +191,15 @@ export function Player() {
 
   return (
     <div className="relative flex h-full flex-col bg-ink text-neutral-100">
+      {book.audioSrc && (
+        <audio
+          ref={audioRef}
+          src={book.audioSrc}
+          preload="auto"
+          className="hidden"
+        />
+      )}
+
       {/* Ambient backdrop — the real Audible player has a pronounced
           light gray-blue atmosphere behind the cover that fades into ink
           by roughly the halfway mark. Two layers so the top band reads

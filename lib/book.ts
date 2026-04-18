@@ -228,15 +228,17 @@ export function lineForTime(chapter: Chapter, t: number): BookLine {
 }
 
 /* -----------------------------------------------------------
- * Adaptive Clip — transcript model (for The Fault in Our Stars demo)
+ * Adaptive Clip — transcript model (for the Pride and Prejudice demo)
  * -----------------------------------------------------------
  *
- * The transcript model is *sentence-aligned*. Each sentence has a real
- * start/end timestamp so Sentence and Scene clip modes can snap to
- * semantic boundaries. Paragraphs group sentences.
+ * Timings align with the LibriVox Chapter 1 recording by Elizabeth
+ * Klett (public domain — CC0), bundled at /audio/pride-ch1.mp3. The
+ * first ~24 s of the recording is the LibriVox attribution and
+ * "Chapter 1" announcement; the novel's text begins around 25 s.
  *
- * For books without a transcript (hasTranscript = false), clip modes
- * fall back to pure time windows (`~10s`, `~60s`).
+ * The transcript model is sentence-aligned. Each sentence has a real
+ * start/end timestamp so the Sentence/Paragraph clip modes can snap to
+ * semantic boundaries. Paragraphs group sentences.
  */
 
 export interface TranscriptSentence {
@@ -269,52 +271,79 @@ export interface ListenBook {
     duration: number // seconds
   }
   bookTimeLeftLabel: string // e.g. "28h 40m left"
+  /** Path to a bundled audio file under /public. When absent, the
+   * player uses a synthetic clock and play/pause is purely visual. */
+  audioSrc?: string
   transcript: BookTranscript
 }
 
-/* Fabricated YA-novel transcript for the listen-mode demo. Text is
- * original to the mockup — it evokes the register without reproducing
- * any actual passage from the book. */
-const faultInOurStarsSentences: TranscriptSentence[] = [
-  { id: 's1',  paragraphId: 'p1', startTime: 0,    endTime: 4.5,  text: 'I learned early that time does not feel the same in every room.' },
-  { id: 's2',  paragraphId: 'p1', startTime: 5.0,  endTime: 10.0, text: 'In hospitals it drags; in cars with your mother it idles; in good conversations it forgets itself entirely.' },
-  { id: 's3',  paragraphId: 'p1', startTime: 10.5, endTime: 15.5, text: 'Someone once told me grief is just love with nowhere to go, and I have been thinking about that ever since.' },
-  { id: 's4',  paragraphId: 'p2', startTime: 17.0, endTime: 20.5, text: 'Support Group met on Wednesdays in a church basement with folding chairs.' },
-  { id: 's5',  paragraphId: 'p2', startTime: 21.0, endTime: 25.5, text: 'The other kids there had the kind of stillness you earn, not the kind you are born with.' },
-  { id: 's6',  paragraphId: 'p2', startTime: 26.0, endTime: 31.0, text: 'Nobody rushed to speak, because, in our own strange ways, we had been rushed enough.' },
-  { id: 's7',  paragraphId: 'p3', startTime: 32.5, endTime: 37.0, text: 'He was the first person in months who did not tilt his head when he looked at me.' },
-  { id: 's8',  paragraphId: 'p3', startTime: 37.5, endTime: 43.0, text: 'He asked me what I was reading, and then he asked about the book I had not finished yet.' },
-  { id: 's9',  paragraphId: 'p3', startTime: 43.5, endTime: 50.0, text: 'Two days later he brought me his own copy, dog-eared and cracked at the spine, and told me it was mine now.' },
-  { id: 's10', paragraphId: 'p4', startTime: 51.5, endTime: 58.0, text: 'I had been told my whole life that some forevers are longer than others.' },
-  { id: 's11', paragraphId: 'p4', startTime: 58.5, endTime: 63.0, text: "I had never thought one of mine would be spent learning the shape of another person's laugh." },
-  { id: 's12', paragraphId: 'p5', startTime: 65.0, endTime: 71.5, text: 'There are days I think none of this would have happened if I had stayed home that one Wednesday.' },
-  { id: 's13', paragraphId: 'p5', startTime: 72.0, endTime: 77.5, text: 'There are days I think every Wednesday would have led me to him in the end.' },
-  { id: 's14', paragraphId: 'p5', startTime: 78.0, endTime: 83.5, text: 'Pain does not change you. It just makes it harder to pretend about who you were.' }
+/* Sentence timings approximated from the LibriVox Chapter 1 recording.
+ * Silences were detected with ffmpeg and cross-referenced against the
+ * public-domain text of the novel. */
+const prideAndPrejudiceSentences: TranscriptSentence[] = [
+  // Paragraph 1 — narrator opens
+  { id: 's1',  paragraphId: 'p1', startTime: 25.0,  endTime: 31.9, text: 'It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.' },
+  { id: 's2',  paragraphId: 'p1', startTime: 33.0,  endTime: 46.1, text: 'However little known the feelings or views of such a man may be on his first entering a neighbourhood, this truth is so well fixed in the minds of the surrounding families, that he is considered the rightful property of some one or other of their daughters.' },
+  // Paragraph 2 — Mrs. Bennet opens the conversation
+  { id: 's3',  paragraphId: 'p2', startTime: 47.2,  endTime: 54.7, text: '"My dear Mr. Bennet," said his lady to him one day, "have you heard that Netherfield Park is let at last?"' },
+  // Paragraph 3
+  { id: 's4',  paragraphId: 'p3', startTime: 55.7,  endTime: 57.7, text: 'Mr. Bennet replied that he had not.' },
+  // Paragraph 4
+  { id: 's5',  paragraphId: 'p4', startTime: 58.6,  endTime: 65.3, text: '"But it is," returned she; "for Mrs. Long has just been here, and she told me all about it."' },
+  // Paragraph 5
+  { id: 's6',  paragraphId: 'p5', startTime: 68.5,  endTime: 72.2, text: 'Mr. Bennet made no answer.' },
+  // Paragraph 6
+  { id: 's7',  paragraphId: 'p6', startTime: 73.0,  endTime: 79.2, text: '"Do not you want to know who has taken it?" cried his wife impatiently.' },
+  // Paragraph 7
+  { id: 's8',  paragraphId: 'p7', startTime: 80.0,  endTime: 85.0, text: '"You want to tell me, and I have no objection to hearing it."' },
+  // Paragraph 8
+  { id: 's9',  paragraphId: 'p8', startTime: 85.6,  endTime: 87.1, text: 'This was invitation enough.' },
+  // Paragraph 9 — Mrs. Bennet's long speech about Mr. Bingley
+  { id: 's10', paragraphId: 'p9', startTime: 87.8,  endTime: 100.7, text: '"Why, my dear, you must know, Mrs. Long says that Netherfield is taken by a young man of large fortune from the north of England;"' },
+  { id: 's11', paragraphId: 'p9', startTime: 101.3, endTime: 117.3, text: '"that he came down on Monday in a chaise and four to see the place, and was so much delighted with it, that he agreed with Mr. Morris immediately;"' },
+  { id: 's12', paragraphId: 'p9', startTime: 118.0, endTime: 130.8, text: '"that he is to take possession before Michaelmas, and some of his servants are to be in the house by the end of next week."' },
+  // Paragraph 10
+  { id: 's13', paragraphId: 'p10', startTime: 131.5, endTime: 134.2, text: '"What is his name?"' },
+  // Paragraph 11
+  { id: 's14', paragraphId: 'p11', startTime: 135.0, endTime: 138.8, text: '"Bingley."' },
+  // Paragraph 12
+  { id: 's15', paragraphId: 'p12', startTime: 139.5, endTime: 145.9, text: '"Is he married or single?"' },
+  // Paragraph 13
+  { id: 's16', paragraphId: 'p13', startTime: 146.5, endTime: 159.9, text: '"Oh! single, my dear, to be sure! A single man of large fortune; four or five thousand a year. What a fine thing for our girls!"' }
 ]
 
-const faultInOurStarsParagraphs: TranscriptParagraph[] = [
-  { id: 'p1', sentenceIds: ['s1', 's2', 's3'] },
-  { id: 'p2', sentenceIds: ['s4', 's5', 's6'] },
-  { id: 'p3', sentenceIds: ['s7', 's8', 's9'] },
-  { id: 'p4', sentenceIds: ['s10', 's11'] },
-  { id: 'p5', sentenceIds: ['s12', 's13', 's14'] }
+const prideAndPrejudiceParagraphs: TranscriptParagraph[] = [
+  { id: 'p1',  sentenceIds: ['s1', 's2'] },
+  { id: 'p2',  sentenceIds: ['s3'] },
+  { id: 'p3',  sentenceIds: ['s4'] },
+  { id: 'p4',  sentenceIds: ['s5'] },
+  { id: 'p5',  sentenceIds: ['s6'] },
+  { id: 'p6',  sentenceIds: ['s7'] },
+  { id: 'p7',  sentenceIds: ['s8'] },
+  { id: 'p8',  sentenceIds: ['s9'] },
+  { id: 'p9',  sentenceIds: ['s10', 's11', 's12'] },
+  { id: 'p10', sentenceIds: ['s13'] },
+  { id: 'p11', sentenceIds: ['s14'] },
+  { id: 'p12', sentenceIds: ['s15'] },
+  { id: 'p13', sentenceIds: ['s16'] }
 ]
 
-export const faultInOurStars: ListenBook = {
-  id: 'the-fault-in-our-stars',
-  title: 'The Fault in Our Stars',
-  author: 'John Green',
-  subtitle: 'Read by Kate Rudd',
+export const prideAndPrejudice: ListenBook = {
+  id: 'pride-and-prejudice',
+  title: 'Pride and Prejudice',
+  author: 'Jane Austen',
+  subtitle: 'Read by Elizabeth Klett',
   chapter: {
     id: 'ch-1',
     title: 'Chapter 1',
-    duration: 1800 // 30 min — scoped to the demo
+    duration: 328 // seconds — actual LibriVox recording length
   },
-  bookTimeLeftLabel: '6h 48m left',
+  bookTimeLeftLabel: '10h 54m left',
+  audioSrc: '/audio/pride-ch1.mp3',
   transcript: {
     hasTranscript: true,
-    sentences: faultInOurStarsSentences,
-    paragraphs: faultInOurStarsParagraphs
+    sentences: prideAndPrejudiceSentences,
+    paragraphs: prideAndPrejudiceParagraphs
   }
 }
 
