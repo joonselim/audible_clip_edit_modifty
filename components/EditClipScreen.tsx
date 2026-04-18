@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { formatLongClock } from '@/lib/book'
+import { formatLongClock, oneSentenceRange, twoSentenceRange, paragraphRange } from '@/lib/book'
 import type { BookTranscript, ListenBook } from '@/lib/book'
 import {
   MODE_LABEL,
@@ -67,8 +67,16 @@ export function EditClipScreen({
   }
   const switchMode = (next: ClipMode) => {
     if (next === mode) return
-    const seconds = MODE_DEFAULT_SECONDS[next]
-    setRange(r => ({ start: Math.max(0, r.end - seconds), end: r.end }))
+    if (hasTranscript) {
+      let r: { start: number; end: number }
+      if (next === 'one-sentence') r = oneSentenceRange(book.transcript, anchorTime)
+      else if (next === 'two-sentences') r = twoSentenceRange(book.transcript, anchorTime)
+      else r = paragraphRange(book.transcript, anchorTime)
+      setRange({ start: r.start, end: r.end })
+    } else {
+      const seconds = MODE_DEFAULT_SECONDS[next]
+      setRange(r => ({ start: Math.max(0, r.end - seconds), end: r.end }))
+    }
     setMode(next)
   }
 
@@ -231,6 +239,21 @@ function ModePill({
  * region to pan the window without re-triggering zoom.
  * ----------------------------------------------------------*/
 
+const SNAP_THRESHOLD = 2 // ±2 seconds snap radius
+
+function nearestSnapPoint(t: number, transcript: BookTranscript | null): number | null {
+  if (!transcript) return null
+  let best: number | null = null
+  let bestDist = SNAP_THRESHOLD
+  for (const s of transcript.sentences) {
+    const dStart = Math.abs(s.startTime - t)
+    const dEnd = Math.abs(s.endTime - t)
+    if (dStart < bestDist) { best = s.startTime; bestDist = dStart }
+    if (dEnd < bestDist) { best = s.endTime; bestDist = dEnd }
+  }
+  return best
+}
+
 const ZOOM_RATIO = 0.5 // selection target = 50% of visible window
 const MIN_VISIBLE = 4 // seconds
 const ZOOM_DELAY_MS = 500
@@ -307,6 +330,8 @@ function WaveformPane({
   const panOrigin = useRef<{ x: number; windowStart: number } | null>(null)
   const animRef = useRef<number | null>(null)
   const zoomTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const snapDisabled = useRef(false)
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [isDragging, setIsDragging] = useState(false)
 
   const cancelAnim = () => {
@@ -366,7 +391,10 @@ function WaveformPane({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selLen, isDragging])
 
-  useEffect(() => () => cancelAnim(), [])
+  useEffect(() => () => {
+    cancelAnim()
+    if (longPressTimerRef.current !== null) clearTimeout(longPressTimerRef.current)
+  }, [])
 
   const onHandleDown = (side: 'start' | 'end') => (e: React.PointerEvent) => {
     e.stopPropagation()
@@ -374,6 +402,10 @@ function WaveformPane({
     cancelAnim()
     dragging.current = side
     setIsDragging(true)
+    snapDisabled.current = false
+    longPressTimerRef.current = setTimeout(() => {
+      snapDisabled.current = true
+    }, 500)
   }
   const onBgPointerDown = (e: React.PointerEvent) => {
     // Only pan when the user grabs the faded (outside) area. If they land
@@ -397,7 +429,11 @@ function WaveformPane({
       return
     }
     const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width))
-    const t = windowStart + ratio * visibleWindow
+    let t = windowStart + ratio * visibleWindow
+    if (!snapDisabled.current) {
+      const snap = nearestSnapPoint(t, transcript)
+      if (snap !== null) t = snap
+    }
     if (dragging.current === 'start') {
       onChange({ start: Math.min(t, end - 1), end })
     } else if (dragging.current === 'end') {
@@ -405,6 +441,11 @@ function WaveformPane({
     }
   }
   const onPointerUp = (e: React.PointerEvent) => {
+    if (longPressTimerRef.current !== null) {
+      clearTimeout(longPressTimerRef.current)
+      longPressTimerRef.current = null
+    }
+    snapDisabled.current = false
     dragging.current = null
     panOrigin.current = null
     setIsDragging(false)

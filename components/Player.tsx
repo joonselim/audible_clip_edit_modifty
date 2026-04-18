@@ -10,6 +10,7 @@ import {
   twoSentenceRange
 } from '@/lib/book'
 import type { BookTranscript, ListenBook } from '@/lib/book'
+import { useTranscript } from '@/lib/useTranscript'
 import { EditClipScreen } from './EditClipScreen'
 
 /* ----------------------------------------------------------
@@ -59,7 +60,11 @@ const START_TIME = 0 // trimmed audio starts at Mrs. Bennet's first line
 
 export function Player() {
   const book = prideAndPrejudice
-  const { transcript } = book
+  const loadedTranscript = useTranscript('/audio/pride-ch1.json.gz')
+  const transcript = loadedTranscript ?? book.transcript
+  const bookForEdit: ListenBook = loadedTranscript
+    ? { ...book, transcript: loadedTranscript }
+    : book as ListenBook
 
   const [currentTime, setCurrentTime] = useState(START_TIME)
   const [isPlaying, setIsPlaying] = useState(true)
@@ -424,7 +429,7 @@ export function Player() {
       {/* Edit overlay */}
       {editingClip && (
         <EditClipScreen
-          book={book as ListenBook}
+          book={bookForEdit}
           clip={editingClip}
           isPreviewing={isPreviewing}
           onPreview={togglePreview}
