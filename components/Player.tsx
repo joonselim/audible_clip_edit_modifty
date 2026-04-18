@@ -3,10 +3,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
+  faultInOurStars,
   formatLongClock,
   oneSentenceRange,
   paragraphRange,
-  promisedLand,
   twoSentenceRange
 } from '@/lib/book'
 import type { BookTranscript, ListenBook } from '@/lib/book'
@@ -58,11 +58,11 @@ const START_TIME = 60 // inside the transcript window so the demo always has sem
  * ----------------------------------------------------------*/
 
 export function Player() {
-  const book = promisedLand
+  const book = faultInOurStars
   const { transcript } = book
 
   const [currentTime, setCurrentTime] = useState(START_TIME)
-  const [isPlaying, setIsPlaying] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(true)
   const [mode, setMode] = useState<ClipMode>(DEFAULT_MODE)
   const [clips, setClips] = useState<Clip[]>([])
   const [toastClipId, setToastClipId] = useState<string | null>(null)
@@ -211,19 +211,21 @@ export function Player() {
         >
           {/* Title at top of cover */}
           <p className="absolute inset-x-0 top-[10%] text-center text-[10px] font-light tracking-[0.22em] text-ink/75">
-            A PROMISED LAND
+            {book.title.toUpperCase()}
           </p>
           {/* Author + narrator at bottom */}
           <div className="absolute inset-x-0 bottom-[14%] text-center">
             <h2
-              className="font-serif text-[19px] font-bold leading-none tracking-[0.06em] text-white"
+              className="font-serif text-[17px] font-bold leading-tight tracking-[0.06em] text-white"
               style={{ textShadow: '0 1px 3px rgba(0,0,0,0.25)' }}
             >
-              BARACK OBAMA
+              {book.author.toUpperCase()}
             </h2>
-            <p className="mt-1.5 text-[8.5px] italic text-white/85">
-              Read by the Author
-            </p>
+            {book.subtitle && (
+              <p className="mt-1.5 text-[8.5px] italic text-white/85">
+                {book.subtitle}
+              </p>
+            )}
           </div>
         </div>
       </div>

@@ -441,10 +441,33 @@ function WaveformPane({
     if (t >= 0 && t <= duration) ticks.push(t)
   }
 
-  const anchorVisible = anchorTime >= windowStart && anchorTime <= windowEnd
+  // Current Position label is rendered *outside* the waveform's
+  // overflow-hidden container so it's never clipped. If the anchor is
+  // outside the visible window we still show the label pinned to the
+  // nearest edge — it's meant to always be visible as an anchor indicator.
+  const anchorRawPct = pct(anchorTime)
+  const anchorClampedPct = Math.max(0, Math.min(100, anchorRawPct))
+  const anchorInView = anchorRawPct >= 0 && anchorRawPct <= 100
+  const anchorTranslateX =
+    anchorClampedPct < 12 ? '0%' : anchorClampedPct > 88 ? '-100%' : '-50%'
 
   return (
-    <div className="mt-4 pt-6 pb-8">
+    <div className="relative mt-4 pb-8">
+      {/* Current Position label — always rendered, clamped to the edges
+          when the anchor sits outside the visible window. */}
+      <div className="relative h-7">
+        <div
+          className="pointer-events-none absolute bottom-0 flex flex-col items-center text-[11px] italic text-neutral-200"
+          style={{
+            left: `${anchorClampedPct}%`,
+            transform: `translateX(${anchorTranslateX})`
+          }}
+        >
+          <span className="whitespace-nowrap font-serif">Current Position</span>
+          <span className="mt-1 h-2.5 w-2.5 rounded-full bg-white" />
+        </div>
+      </div>
+
       <div
         ref={containerRef}
         onPointerDown={onBgPointerDown}
@@ -498,22 +521,14 @@ function WaveformPane({
           <HandleChevron flip />
         </div>
 
-        {/* Current Position — fixed anchor (not tied to end handle). Vertical
-            line runs through the waveform to emphasize the anchor. */}
-        {anchorVisible && (
-          <>
-            <div
-              className="pointer-events-none absolute inset-y-0 w-px bg-white/60"
-              style={{ left: `${pct(anchorTime)}%` }}
-            />
-            <div
-              className="pointer-events-none absolute -top-5 -translate-x-1/2 flex flex-col items-center text-[11px] italic text-neutral-200"
-              style={{ left: `${pct(anchorTime)}%` }}
-            >
-              <span className="whitespace-nowrap font-serif">Current Position</span>
-              <span className="mt-1 h-2.5 w-2.5 rounded-full bg-white" />
-            </div>
-          </>
+        {/* Current Position — vertical line only runs through the waveform
+            when the anchor is in view. The text label lives outside the
+            overflow-hidden container so it's never clipped. */}
+        {anchorInView && (
+          <div
+            className="pointer-events-none absolute inset-y-0 w-px bg-white/60"
+            style={{ left: `${anchorRawPct}%` }}
+          />
         )}
       </div>
 

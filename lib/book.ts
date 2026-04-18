@@ -228,7 +228,7 @@ export function lineForTime(chapter: Chapter, t: number): BookLine {
 }
 
 /* -----------------------------------------------------------
- * Adaptive Clip — transcript model (for A Promised Land demo)
+ * Adaptive Clip — transcript model (for The Fault in Our Stars demo)
  * -----------------------------------------------------------
  *
  * The transcript model is *sentence-aligned*. Each sentence has a real
@@ -272,27 +272,27 @@ export interface ListenBook {
   transcript: BookTranscript
 }
 
-/* Fabricated memoir-style transcript for the Obama listen-mode demo.
- * Text is original to the mockup — it evokes the memoir register
- * without reproducing the actual book. */
-const promisedLandSentences: TranscriptSentence[] = [
-  { id: 's1',  paragraphId: 'p1', startTime: 0,    endTime: 4.5,  text: 'I come from a family that did not have much.' },
-  { id: 's2',  paragraphId: 'p1', startTime: 5.0,  endTime: 10.0, text: 'My mother worked long hours, and my grandparents filled in the gaps.' },
-  { id: 's3',  paragraphId: 'p1', startTime: 10.5, endTime: 15.5, text: 'When I look back now, I see just how much they carried so I could be light.' },
-  { id: 's4',  paragraphId: 'p2', startTime: 17.0, endTime: 20.5, text: 'They did not speak often about politics.' },
-  { id: 's5',  paragraphId: 'p2', startTime: 21.0, endTime: 25.5, text: "But they taught me that a person's word matters." },
-  { id: 's6',  paragraphId: 'p2', startTime: 26.0, endTime: 31.0, text: 'And that kindness, quiet and steady, was its own kind of power.' },
-  { id: 's7',  paragraphId: 'p3', startTime: 32.5, endTime: 37.0, text: 'It was in college that I first started to pay attention.' },
-  { id: 's8',  paragraphId: 'p3', startTime: 37.5, endTime: 43.0, text: 'I read every book I could find on how societies were built, and how they came apart.' },
-  { id: 's9',  paragraphId: 'p3', startTime: 43.5, endTime: 50.0, text: 'And I began to see that the country I loved had made promises it had not yet kept.' },
-  { id: 's10', paragraphId: 'p4', startTime: 51.5, endTime: 58.0, text: "My grandmother used to say, 'the world will not wait for you to be ready.'" },
-  { id: 's11', paragraphId: 'p4', startTime: 58.5, endTime: 63.0, text: 'She was right about that, and about most things.' },
-  { id: 's12', paragraphId: 'p5', startTime: 65.0, endTime: 71.5, text: 'The road from those early years to the Oval Office was not a straight line.' },
-  { id: 's13', paragraphId: 'p5', startTime: 72.0, endTime: 77.5, text: 'It curved through doubt, through failure, and through the kindness of strangers.' },
-  { id: 's14', paragraphId: 'p5', startTime: 78.0, endTime: 83.5, text: 'Every step taught me something I did not know I would one day need.' }
+/* Fabricated YA-novel transcript for the listen-mode demo. Text is
+ * original to the mockup — it evokes the register without reproducing
+ * any actual passage from the book. */
+const faultInOurStarsSentences: TranscriptSentence[] = [
+  { id: 's1',  paragraphId: 'p1', startTime: 0,    endTime: 4.5,  text: 'I learned early that time does not feel the same in every room.' },
+  { id: 's2',  paragraphId: 'p1', startTime: 5.0,  endTime: 10.0, text: 'In hospitals it drags; in cars with your mother it idles; in good conversations it forgets itself entirely.' },
+  { id: 's3',  paragraphId: 'p1', startTime: 10.5, endTime: 15.5, text: 'Someone once told me grief is just love with nowhere to go, and I have been thinking about that ever since.' },
+  { id: 's4',  paragraphId: 'p2', startTime: 17.0, endTime: 20.5, text: 'Support Group met on Wednesdays in a church basement with folding chairs.' },
+  { id: 's5',  paragraphId: 'p2', startTime: 21.0, endTime: 25.5, text: 'The other kids there had the kind of stillness you earn, not the kind you are born with.' },
+  { id: 's6',  paragraphId: 'p2', startTime: 26.0, endTime: 31.0, text: 'Nobody rushed to speak, because, in our own strange ways, we had been rushed enough.' },
+  { id: 's7',  paragraphId: 'p3', startTime: 32.5, endTime: 37.0, text: 'He was the first person in months who did not tilt his head when he looked at me.' },
+  { id: 's8',  paragraphId: 'p3', startTime: 37.5, endTime: 43.0, text: 'He asked me what I was reading, and then he asked about the book I had not finished yet.' },
+  { id: 's9',  paragraphId: 'p3', startTime: 43.5, endTime: 50.0, text: 'Two days later he brought me his own copy, dog-eared and cracked at the spine, and told me it was mine now.' },
+  { id: 's10', paragraphId: 'p4', startTime: 51.5, endTime: 58.0, text: 'I had been told my whole life that some forevers are longer than others.' },
+  { id: 's11', paragraphId: 'p4', startTime: 58.5, endTime: 63.0, text: "I had never thought one of mine would be spent learning the shape of another person's laugh." },
+  { id: 's12', paragraphId: 'p5', startTime: 65.0, endTime: 71.5, text: 'There are days I think none of this would have happened if I had stayed home that one Wednesday.' },
+  { id: 's13', paragraphId: 'p5', startTime: 72.0, endTime: 77.5, text: 'There are days I think every Wednesday would have led me to him in the end.' },
+  { id: 's14', paragraphId: 'p5', startTime: 78.0, endTime: 83.5, text: 'Pain does not change you. It just makes it harder to pretend about who you were.' }
 ]
 
-const promisedLandParagraphs: TranscriptParagraph[] = [
+const faultInOurStarsParagraphs: TranscriptParagraph[] = [
   { id: 'p1', sentenceIds: ['s1', 's2', 's3'] },
   { id: 'p2', sentenceIds: ['s4', 's5', 's6'] },
   { id: 'p3', sentenceIds: ['s7', 's8', 's9'] },
@@ -300,21 +300,21 @@ const promisedLandParagraphs: TranscriptParagraph[] = [
   { id: 'p5', sentenceIds: ['s12', 's13', 's14'] }
 ]
 
-export const promisedLand: ListenBook = {
-  id: 'a-promised-land',
-  title: 'A Promised Land',
-  author: 'Barack Obama',
-  subtitle: 'Read by the Author',
+export const faultInOurStars: ListenBook = {
+  id: 'the-fault-in-our-stars',
+  title: 'The Fault in Our Stars',
+  author: 'John Green',
+  subtitle: 'Read by Kate Rudd',
   chapter: {
     id: 'ch-1',
     title: 'Chapter 1',
     duration: 1800 // 30 min — scoped to the demo
   },
-  bookTimeLeftLabel: '28h 40m left',
+  bookTimeLeftLabel: '6h 48m left',
   transcript: {
     hasTranscript: true,
-    sentences: promisedLandSentences,
-    paragraphs: promisedLandParagraphs
+    sentences: faultInOurStarsSentences,
+    paragraphs: faultInOurStarsParagraphs
   }
 }
 
