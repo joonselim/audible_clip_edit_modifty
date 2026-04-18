@@ -232,9 +232,10 @@ export function lineForTime(chapter: Chapter, t: number): BookLine {
  * -----------------------------------------------------------
  *
  * Timings align with the LibriVox Chapter 1 recording by Elizabeth
- * Klett (public domain — CC0), bundled at /audio/pride-ch1.mp3. The
- * first ~24 s of the recording is the LibriVox attribution and
- * "Chapter 1" announcement; the novel's text begins around 25 s.
+ * Klett (public domain — CC0). The bundled MP3 at /audio/pride-ch1.mp3
+ * has been trimmed to drop the LibriVox attribution + the novel's
+ * two-sentence opening narration, so playback starts right at Mrs.
+ * Bennet's first line and the demo lands in dialog immediately.
  *
  * The transcript model is sentence-aligned. Each sentence has a real
  * start/end timestamp so the Sentence/Paragraph clip modes can snap to
@@ -277,55 +278,51 @@ export interface ListenBook {
   transcript: BookTranscript
 }
 
-/* Sentence timings approximated from the LibriVox Chapter 1 recording.
- * Silences were detected with ffmpeg and cross-referenced against the
- * public-domain text of the novel. */
+/* Sentence timings align with the trimmed LibriVox recording. The
+ * original opening (truth universally acknowledged + paragraph 2) was
+ * cut off, so s1 = Mrs. Bennet's first line and times start near 0. */
 const prideAndPrejudiceSentences: TranscriptSentence[] = [
-  // Paragraph 1 — narrator opens
-  { id: 's1',  paragraphId: 'p1', startTime: 25.0,  endTime: 31.9, text: 'It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.' },
-  { id: 's2',  paragraphId: 'p1', startTime: 33.0,  endTime: 46.1, text: 'However little known the feelings or views of such a man may be on his first entering a neighbourhood, this truth is so well fixed in the minds of the surrounding families, that he is considered the rightful property of some one or other of their daughters.' },
-  // Paragraph 2 — Mrs. Bennet opens the conversation
-  { id: 's3',  paragraphId: 'p2', startTime: 47.2,  endTime: 54.7, text: '"My dear Mr. Bennet," said his lady to him one day, "have you heard that Netherfield Park is let at last?"' },
+  // Paragraph 1 — Mrs. Bennet opens the conversation
+  { id: 's1',  paragraphId: 'p1', startTime: 0.2,   endTime: 7.7,  text: '"My dear Mr. Bennet," said his lady to him one day, "have you heard that Netherfield Park is let at last?"' },
+  // Paragraph 2
+  { id: 's2',  paragraphId: 'p2', startTime: 8.7,   endTime: 10.7, text: 'Mr. Bennet replied that he had not.' },
   // Paragraph 3
-  { id: 's4',  paragraphId: 'p3', startTime: 55.7,  endTime: 57.7, text: 'Mr. Bennet replied that he had not.' },
+  { id: 's3',  paragraphId: 'p3', startTime: 11.6,  endTime: 18.3, text: '"But it is," returned she; "for Mrs. Long has just been here, and she told me all about it."' },
   // Paragraph 4
-  { id: 's5',  paragraphId: 'p4', startTime: 58.6,  endTime: 65.3, text: '"But it is," returned she; "for Mrs. Long has just been here, and she told me all about it."' },
+  { id: 's4',  paragraphId: 'p4', startTime: 21.5,  endTime: 25.2, text: 'Mr. Bennet made no answer.' },
   // Paragraph 5
-  { id: 's6',  paragraphId: 'p5', startTime: 68.5,  endTime: 72.2, text: 'Mr. Bennet made no answer.' },
+  { id: 's5',  paragraphId: 'p5', startTime: 26.0,  endTime: 32.2, text: '"Do not you want to know who has taken it?" cried his wife impatiently.' },
   // Paragraph 6
-  { id: 's7',  paragraphId: 'p6', startTime: 73.0,  endTime: 79.2, text: '"Do not you want to know who has taken it?" cried his wife impatiently.' },
+  { id: 's6',  paragraphId: 'p6', startTime: 33.0,  endTime: 38.0, text: '"You want to tell me, and I have no objection to hearing it."' },
   // Paragraph 7
-  { id: 's8',  paragraphId: 'p7', startTime: 80.0,  endTime: 85.0, text: '"You want to tell me, and I have no objection to hearing it."' },
-  // Paragraph 8
-  { id: 's9',  paragraphId: 'p8', startTime: 85.6,  endTime: 87.1, text: 'This was invitation enough.' },
-  // Paragraph 9 — Mrs. Bennet's long speech about Mr. Bingley
-  { id: 's10', paragraphId: 'p9', startTime: 87.8,  endTime: 100.7, text: '"Why, my dear, you must know, Mrs. Long says that Netherfield is taken by a young man of large fortune from the north of England;"' },
-  { id: 's11', paragraphId: 'p9', startTime: 101.3, endTime: 117.3, text: '"that he came down on Monday in a chaise and four to see the place, and was so much delighted with it, that he agreed with Mr. Morris immediately;"' },
-  { id: 's12', paragraphId: 'p9', startTime: 118.0, endTime: 130.8, text: '"that he is to take possession before Michaelmas, and some of his servants are to be in the house by the end of next week."' },
+  { id: 's7',  paragraphId: 'p7', startTime: 38.6,  endTime: 40.1, text: 'This was invitation enough.' },
+  // Paragraph 8 — Mrs. Bennet's long speech about Mr. Bingley
+  { id: 's8',  paragraphId: 'p8', startTime: 40.8,  endTime: 53.7, text: '"Why, my dear, you must know, Mrs. Long says that Netherfield is taken by a young man of large fortune from the north of England;"' },
+  { id: 's9',  paragraphId: 'p8', startTime: 54.3,  endTime: 70.3, text: '"that he came down on Monday in a chaise and four to see the place, and was so much delighted with it, that he agreed with Mr. Morris immediately;"' },
+  { id: 's10', paragraphId: 'p8', startTime: 71.0,  endTime: 83.8, text: '"that he is to take possession before Michaelmas, and some of his servants are to be in the house by the end of next week."' },
+  // Paragraph 9
+  { id: 's11', paragraphId: 'p9', startTime: 84.5,  endTime: 87.2, text: '"What is his name?"' },
   // Paragraph 10
-  { id: 's13', paragraphId: 'p10', startTime: 131.5, endTime: 134.2, text: '"What is his name?"' },
+  { id: 's12', paragraphId: 'p10', startTime: 88.0,  endTime: 91.8, text: '"Bingley."' },
   // Paragraph 11
-  { id: 's14', paragraphId: 'p11', startTime: 135.0, endTime: 138.8, text: '"Bingley."' },
+  { id: 's13', paragraphId: 'p11', startTime: 92.5,  endTime: 98.9, text: '"Is he married or single?"' },
   // Paragraph 12
-  { id: 's15', paragraphId: 'p12', startTime: 139.5, endTime: 145.9, text: '"Is he married or single?"' },
-  // Paragraph 13
-  { id: 's16', paragraphId: 'p13', startTime: 146.5, endTime: 159.9, text: '"Oh! single, my dear, to be sure! A single man of large fortune; four or five thousand a year. What a fine thing for our girls!"' }
+  { id: 's14', paragraphId: 'p12', startTime: 99.5,  endTime: 112.9, text: '"Oh! single, my dear, to be sure! A single man of large fortune; four or five thousand a year. What a fine thing for our girls!"' }
 ]
 
 const prideAndPrejudiceParagraphs: TranscriptParagraph[] = [
-  { id: 'p1',  sentenceIds: ['s1', 's2'] },
-  { id: 'p2',  sentenceIds: ['s3'] },
-  { id: 'p3',  sentenceIds: ['s4'] },
-  { id: 'p4',  sentenceIds: ['s5'] },
-  { id: 'p5',  sentenceIds: ['s6'] },
-  { id: 'p6',  sentenceIds: ['s7'] },
-  { id: 'p7',  sentenceIds: ['s8'] },
-  { id: 'p8',  sentenceIds: ['s9'] },
-  { id: 'p9',  sentenceIds: ['s10', 's11', 's12'] },
-  { id: 'p10', sentenceIds: ['s13'] },
-  { id: 'p11', sentenceIds: ['s14'] },
-  { id: 'p12', sentenceIds: ['s15'] },
-  { id: 'p13', sentenceIds: ['s16'] }
+  { id: 'p1',  sentenceIds: ['s1'] },
+  { id: 'p2',  sentenceIds: ['s2'] },
+  { id: 'p3',  sentenceIds: ['s3'] },
+  { id: 'p4',  sentenceIds: ['s4'] },
+  { id: 'p5',  sentenceIds: ['s5'] },
+  { id: 'p6',  sentenceIds: ['s6'] },
+  { id: 'p7',  sentenceIds: ['s7'] },
+  { id: 'p8',  sentenceIds: ['s8', 's9', 's10'] },
+  { id: 'p9',  sentenceIds: ['s11'] },
+  { id: 'p10', sentenceIds: ['s12'] },
+  { id: 'p11', sentenceIds: ['s13'] },
+  { id: 'p12', sentenceIds: ['s14'] }
 ]
 
 export const prideAndPrejudice: ListenBook = {
@@ -336,9 +333,9 @@ export const prideAndPrejudice: ListenBook = {
   chapter: {
     id: 'ch-1',
     title: 'Chapter 1',
-    duration: 328 // seconds — actual LibriVox recording length
+    duration: 281 // seconds — trimmed LibriVox recording length
   },
-  bookTimeLeftLabel: '10h 54m left',
+  bookTimeLeftLabel: '10h 53m left',
   audioSrc: '/audio/pride-ch1.mp3',
   transcript: {
     hasTranscript: true,

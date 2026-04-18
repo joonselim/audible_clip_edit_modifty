@@ -51,7 +51,7 @@ export interface Clip {
 }
 
 const DEFAULT_MODE: ClipMode = 'two-sentences'
-const START_TIME = 47 // lands right at Mrs. Bennet's first line so playback has dialog immediately
+const START_TIME = 0 // trimmed audio starts at Mrs. Bennet's first line
 
 /* ----------------------------------------------------------
  * Player
@@ -63,11 +63,15 @@ export function Player() {
 
   const [currentTime, setCurrentTime] = useState(START_TIME)
   const [isPlaying, setIsPlaying] = useState(true)
+  const [isPreviewing, setIsPreviewing] = useState(false)
   const [mode, setMode] = useState<ClipMode>(DEFAULT_MODE)
   const [clips, setClips] = useState<Clip[]>([])
   const [toastClipId, setToastClipId] = useState<string | null>(null)
   const [editingClipId, setEditingClipId] = useState<string | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  // When this is set, playback auto-pauses the moment audio.currentTime
+  // reaches it — used to stop clip preview playback at the clip's end.
+  const previewEndRef = useRef<number | null>(null)
 
   /* ----- Playback clock -----
    * Real audio: time and play-state are driven by the <audio> element.
@@ -99,8 +103,23 @@ export function Player() {
     const a = audioRef.current
     if (!a) return
     a.currentTime = START_TIME
-    const onTime = () => setCurrentTime(a.currentTime)
-    const onEnded = () => setIsPlaying(false)
+    const onTime = () => {
+      setCurrentTime(a.currentTime)
+      if (
+        previewEndRef.current !== null &&
+        a.currentTime >= previewEndRef.current
+      ) {
+        previewEndRef.current = null
+        a.pause()
+        setIsPreviewing(false)
+        setIsPlaying(false)
+      }
+    }
+    const onEnded = () => {
+      previewEndRef.current = null
+      setIsPreviewing(false)
+      setIsPlaying(false)
+    }
     a.addEventListener('timeupdate', onTime)
     a.addEventListener('ended', onEnded)
     return () => {
@@ -108,6 +127,28 @@ export function Player() {
       a.removeEventListener('ended', onEnded)
     }
   }, [])
+
+  /* Autoplay fallback — if the browser blocked initial play() (common
+   * on Safari / mobile), the very next user gesture anywhere on the
+   * document kicks it off. The listener removes itself as soon as
+   * playback starts. */
+  useEffect(() => {
+    const a = audioRef.current
+    if (!a || !isPlaying) return
+    if (!a.paused) return
+    const kick = () => {
+      a.play()
+        .then(() => cleanup())
+        .catch(() => {})
+    }
+    const cleanup = () => {
+      document.removeEventListener('pointerdown', kick)
+      document.removeEventListener('keydown', kick)
+    }
+    document.addEventListener('pointerdown', kick, { once: false })
+    document.addEventListener('keydown', kick, { once: false })
+    return cleanup
+  }, [isPlaying])
 
   /* ----- Clip computation ----- */
   const computeClipRange = useCallback(
@@ -182,6 +223,29 @@ export function Player() {
     setEditingClipId(null)
     setToastClipId(null)
   }
+
+  /* Preview the current clip range from the Edit screen. Pressing the
+   * preview button toggles playback — on, we seek to clip.start and
+   * play up to clip.end (at which point the timeupdate handler auto-
+   * pauses). On, off again stops immediately. */
+  const togglePreview = useCallback(
+    (clipStart: number, clipEnd: number) => {
+      const a = audioRef.current
+      if (!a) return
+      if (isPreviewing) {
+        previewEndRef.current = null
+        a.pause()
+        setIsPreviewing(false)
+        setIsPlaying(false)
+        return
+      }
+      a.currentTime = clipStart
+      previewEndRef.current = clipEnd
+      setIsPreviewing(true)
+      setIsPlaying(true)
+    },
+    [isPreviewing]
+  )
 
   /* ----- Derived UI state ----- */
   const remaining = Math.max(0, book.chapter.duration - currentTime)
@@ -362,9 +426,15 @@ export function Player() {
         <EditClipScreen
           book={book as ListenBook}
           clip={editingClip}
+          isPreviewing={isPreviewing}
+          onPreview={togglePreview}
           onSave={commitEdit}
           onDelete={deleteClip}
-          onClose={() => setEditingClipId(null)}
+          onClose={() => {
+            previewEndRef.current = null
+            setIsPreviewing(false)
+            setEditingClipId(null)
+          }}
         />
       )}
     </div>

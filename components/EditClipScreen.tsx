@@ -30,12 +30,16 @@ import type { Clip, ClipMode } from './Player'
 export function EditClipScreen({
   book,
   clip,
+  isPreviewing,
+  onPreview,
   onSave,
   onDelete,
   onClose
 }: {
   book: ListenBook
   clip: Clip
+  isPreviewing: boolean
+  onPreview: (clipStart: number, clipEnd: number) => void
   onSave: (c: Clip) => void
   onDelete: (id: string) => void
   onClose: () => void
@@ -144,10 +148,11 @@ export function EditClipScreen({
         {/* Play button */}
         <div className="my-5 flex justify-center">
           <button
-            aria-label="Preview clip"
+            onClick={() => onPreview(range.start, range.end)}
+            aria-label={isPreviewing ? 'Pause preview' : 'Preview clip'}
             className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-ink shadow-lg active:scale-95"
           >
-            <PlayIcon />
+            {isPreviewing ? <PauseIcon /> : <PlayIcon />}
           </button>
         </div>
 
@@ -669,6 +674,14 @@ function PlayIcon() {
   return (
     <svg width="16" height="18" viewBox="0 0 16 18" fill="currentColor">
       <path d="M2 1l14 8-14 8V1z" />
+    </svg>
+  )
+}
+function PauseIcon() {
+  return (
+    <svg width="16" height="18" viewBox="0 0 16 18" fill="currentColor">
+      <rect x="2" y="1" width="4" height="16" rx="1" />
+      <rect x="10" y="1" width="4" height="16" rx="1" />
     </svg>
   )
 }
