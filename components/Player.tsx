@@ -68,6 +68,7 @@ export function Player() {
   const [clips, setClips] = useState<Clip[]>([])
   const [toastClipId, setToastClipId] = useState<string | null>(null)
   const [editingClipId, setEditingClipId] = useState<string | null>(null)
+  const [showHint, setShowHint] = useState(true)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   // When this is set, playback auto-pauses the moment audio.currentTime
   // reaches it — used to stop clip preview playback at the clip's end.
@@ -425,6 +426,24 @@ export function Player() {
           onEdit={() => setEditingClipId(toastClip.id)}
           onClose={() => setToastClipId(null)}
         />
+      )}
+
+      {/* Onboarding hint — any tap anywhere dismisses */}
+      {showHint && (
+        <div
+          className="absolute inset-0 z-30"
+          onClick={() => setShowHint(false)}
+        >
+          <div className="absolute bottom-[110px] right-4">
+            <div className="relative rounded-2xl bg-white px-4 py-3 shadow-2xl shadow-black/40">
+              <p className="text-[13.5px] font-semibold text-ink whitespace-nowrap">
+                Try clipping! ✂️
+              </p>
+              {/* Arrow pointing toward + Clip button */}
+              <div className="absolute -bottom-[5px] right-[28px] h-[10px] w-[10px] rotate-45 bg-white" />
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Edit overlay */}
