@@ -434,13 +434,13 @@ export function Player() {
           className="absolute inset-0 z-30"
           onClick={() => setShowHint(false)}
         >
-          <div className="absolute bottom-[110px] right-4">
-            <div className="relative rounded-2xl bg-white px-4 py-3 shadow-2xl shadow-black/40">
-              <p className="text-[13.5px] font-semibold text-ink whitespace-nowrap">
+          <div className="absolute bottom-[76px] right-4">
+            <div className="relative rounded-2xl bg-panel/70 px-4 py-3 ring-1 ring-white/10 backdrop-blur-sm">
+              <p className="text-[13.5px] font-semibold text-neutral-100 whitespace-nowrap">
                 Try clipping! ✂️
               </p>
               {/* Arrow pointing toward + Clip button */}
-              <div className="absolute -bottom-[5px] right-[28px] h-[10px] w-[10px] rotate-45 bg-white" />
+              <div className="absolute -bottom-[5px] right-[28px] h-[10px] w-[10px] rotate-45 bg-[#161b22] ring-1 ring-white/10" />
             </div>
           </div>
         </div>
