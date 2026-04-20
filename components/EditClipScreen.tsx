@@ -141,7 +141,6 @@ export function EditClipScreen({
           onChange={next => setRange(next)}
           duration={book.chapter.duration}
           transcript={hasTranscript ? book.transcript : null}
-          mode={mode}
         />
 
         {/* Time range */}
@@ -288,8 +287,7 @@ function WaveformPane({
   anchorTime,
   onChange,
   duration,
-  transcript,
-  mode
+  transcript
 }: {
   start: number
   end: number
@@ -297,7 +295,6 @@ function WaveformPane({
   onChange: (r: { start: number; end: number }) => void
   duration: number
   transcript: BookTranscript | null
-  mode: ClipMode
 }) {
 
   // Dynamic zoom window + pan offset.
@@ -420,11 +417,13 @@ function WaveformPane({
     ;(e.target as Element).releasePointerCapture?.(e.pointerId)
   }
 
-  // Labels reflect the selected mode, not boundary detection — avoids the
-  // "always paragraph" problem when every sentence is its own paragraph.
-  const isParagraphMode = mode === 'paragraph'
-  const startLabel = transcript ? (isParagraphMode ? 'start of paragraph' : 'start of sentence') : null
-  const endLabel   = transcript ? (isParagraphMode ? 'end of paragraph'   : 'end of sentence')   : null
+  // Labels only appear when the handle is within ±0.6 s of a real sentence
+  // boundary — so dragging away from a boundary hides the label.
+  const TOLERANCE = 0.6
+  const startLabel = transcript?.sentences.some(s => Math.abs(s.startTime - start) <= TOLERANCE)
+    ? 'start of sentence' : null
+  const endLabel = transcript?.sentences.some(s => Math.abs(s.endTime - end) <= TOLERANCE)
+    ? 'end of sentence' : null
 
   // Bars are anchored to absolute time, so zooming in spaces them apart.
   const firstBarIdx = Math.max(0, Math.floor(windowStart * BARS_PER_SECOND) - 1)
