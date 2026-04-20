@@ -70,6 +70,7 @@ export function Player() {
   const [editingClipId, setEditingClipId] = useState<string | null>(null)
   const [showHint, setShowHint] = useState(true)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const playBtnRef = useRef<HTMLButtonElement | null>(null)
   // When this is set, playback auto-pauses the moment audio.currentTime
   // reaches it — used to stop clip preview playback at the clip's end.
   const previewEndRef = useRef<number | null>(null)
@@ -196,11 +197,11 @@ export function Player() {
     return () => window.clearTimeout(t)
   }, [toastClipId])
 
-  /* ----- Hint dismiss on click anywhere except [data-nohint] ----- */
+  /* ----- Hint dismiss on click anywhere except the play button ----- */
   useEffect(() => {
     if (!showHint) return
     const dismiss = (e: MouseEvent) => {
-      if ((e.target as HTMLElement).closest('[data-nohint]')) return
+      if (playBtnRef.current?.contains(e.target as Node)) return
       setShowHint(false)
     }
     document.addEventListener('click', dismiss)
@@ -397,7 +398,7 @@ export function Player() {
           <Back30 />
         </button>
         <button
-          data-nohint
+          ref={playBtnRef}
           aria-label={isPlaying ? 'Pause' : 'Play'}
           onClick={() => setIsPlaying(p => !p)}
           className="flex h-[68px] w-[68px] items-center justify-center rounded-full bg-white text-ink shadow-lg active:scale-95"
