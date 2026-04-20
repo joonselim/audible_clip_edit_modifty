@@ -100,11 +100,10 @@ export function Player() {
     }
     a.addEventListener('timeupdate', onTime)
     a.addEventListener('ended', onEnded)
-    // Kick off autoplay after seeking
-    const p = a.play()
-    if (p && typeof p.catch === 'function') {
-      p.catch(() => setIsPlaying(false))
-    }
+    // Kick off autoplay after seeking.
+    // Don't set isPlaying(false) on rejection — keeps the fallback gesture
+    // listener active so the first user tap starts audio.
+    a.play().catch(() => {})
     return () => {
       a.removeEventListener('timeupdate', onTime)
       a.removeEventListener('ended', onEnded)
@@ -432,7 +431,12 @@ export function Player() {
       {showHint && (
         <div
           className="absolute inset-0 z-30"
-          onClick={() => setShowHint(false)}
+          onClick={() => {
+            setShowHint(false)
+            // Hint dismiss is the first user gesture — use it to unblock audio.
+            const a = audioRef.current
+            if (a) a.play().then(() => setIsPlaying(true)).catch(() => {})
+          }}
         >
           <div className="absolute bottom-[76px] right-4">
             <div className="relative rounded-2xl bg-panel/70 px-4 py-3 ring-1 ring-white/10 backdrop-blur-sm">
