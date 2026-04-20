@@ -494,9 +494,6 @@ function ClipToast({
     ? MODE_LABEL[clip.mode]
     : MODE_LABEL_FALLBACK[clip.mode]
 
-  const canShrink = clip.mode !== MODE_ORDER[0]
-  const canExpand = clip.mode !== MODE_ORDER[MODE_ORDER.length - 1]
-
   return (
     <div
       onClick={onClose}
@@ -510,23 +507,23 @@ function ClipToast({
           <CheckIcon />
         </span>
         <p className="flex-1 min-w-0 truncate text-[12.5px] font-semibold">
-          Clip saved · <span className="text-neutral-700">{label}</span>
+          Clip saved
         </p>
         <div className="flex shrink-0 items-center gap-1">
-          <ToastStep
+          <ModeChip
+            active={clip.mode === 'one-sentence'}
             onClick={onShrink}
-            disabled={!canShrink}
-            aria-label="Shrink to smaller unit"
+            aria-label="1 sentence"
           >
-            −
-          </ToastStep>
-          <ToastStep
+            1
+          </ModeChip>
+          <ModeChip
+            active={clip.mode === 'two-sentences'}
             onClick={onExpand}
-            disabled={!canExpand}
-            aria-label="Expand to larger unit"
+            aria-label="2 sentences"
           >
-            +
-          </ToastStep>
+            2
+          </ModeChip>
         </div>
         <button
           onClick={onEdit}
@@ -539,24 +536,23 @@ function ClipToast({
   )
 }
 
-function ToastStep({
+function ModeChip({
+  active,
   onClick,
-  disabled,
   children,
   ...rest
 }: {
+  active: boolean
   onClick: () => void
-  disabled?: boolean
   children: React.ReactNode
 } & React.ComponentProps<'button'>) {
   return (
     <button
       onClick={onClick}
-      disabled={disabled}
-      className={`flex h-7 w-8 items-center justify-center rounded-full border text-[16px] font-medium leading-none active:scale-95 ${
-        disabled
-          ? 'border-black/5 text-neutral-400'
-          : 'border-black/10 text-ink hover:bg-black/5'
+      className={`flex h-7 w-8 items-center justify-center rounded-full text-[13px] font-semibold leading-none active:scale-95 transition-colors ${
+        active
+          ? 'bg-ink text-white'
+          : 'border border-black/10 text-neutral-400 hover:bg-black/5'
       }`}
       {...rest}
     >
