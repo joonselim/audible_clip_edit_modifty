@@ -20,8 +20,7 @@ export type ClipMode = 'one-sentence' | 'two-sentences' | 'paragraph'
 
 export const MODE_ORDER: ClipMode[] = [
   'one-sentence',
-  'two-sentences',
-  'paragraph'
+  'two-sentences'
 ]
 
 export const MODE_LABEL: Record<ClipMode, string> = {
