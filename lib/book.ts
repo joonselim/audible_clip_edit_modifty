@@ -300,29 +300,24 @@ const prideAndPrejudiceSentences: TranscriptSentence[] = [
   { id: 's8',  paragraphId: 'p8', startTime: 40.8,  endTime: 53.7, text: '"Why, my dear, you must know, Mrs. Long says that Netherfield is taken by a young man of large fortune from the north of England;"' },
   { id: 's9',  paragraphId: 'p8', startTime: 54.3,  endTime: 70.3, text: '"that he came down on Monday in a chaise and four to see the place, and was so much delighted with it, that he agreed with Mr. Morris immediately;"' },
   { id: 's10', paragraphId: 'p8', startTime: 71.0,  endTime: 83.8, text: '"that he is to take possession before Michaelmas, and some of his servants are to be in the house by the end of next week."' },
-  // Paragraph 9
-  { id: 's11', paragraphId: 'p9', startTime: 84.5,  endTime: 87.2, text: '"What is his name?"' },
-  // Paragraph 10
-  { id: 's12', paragraphId: 'p10', startTime: 88.0,  endTime: 91.8, text: '"Bingley."' },
-  // Paragraph 11
-  { id: 's13', paragraphId: 'p11', startTime: 92.5,  endTime: 98.9, text: '"Is he married or single?"' },
-  // Paragraph 12
-  { id: 's14', paragraphId: 'p12', startTime: 99.5,  endTime: 112.9, text: '"Oh! single, my dear, to be sure! A single man of large fortune; four or five thousand a year. What a fine thing for our girls!"' }
+  // Paragraph 9 — quick dialogue exchange (grouped so 2-sentence and
+  //               paragraph modes produce visibly different ranges)
+  { id: 's11', paragraphId: 'p9', startTime: 84.5,  endTime: 87.2,  text: '"What is his name?"' },
+  { id: 's12', paragraphId: 'p9', startTime: 88.0,  endTime: 91.8,  text: '"Bingley."' },
+  { id: 's13', paragraphId: 'p9', startTime: 92.5,  endTime: 98.9,  text: '"Is he married or single?"' },
+  { id: 's14', paragraphId: 'p9', startTime: 99.5,  endTime: 112.9, text: '"Oh! single, my dear, to be sure! A single man of large fortune; four or five thousand a year. What a fine thing for our girls!"' }
 ]
 
 const prideAndPrejudiceParagraphs: TranscriptParagraph[] = [
-  { id: 'p1',  sentenceIds: ['s1'] },
-  { id: 'p2',  sentenceIds: ['s2'] },
-  { id: 'p3',  sentenceIds: ['s3'] },
-  { id: 'p4',  sentenceIds: ['s4'] },
-  { id: 'p5',  sentenceIds: ['s5'] },
-  { id: 'p6',  sentenceIds: ['s6'] },
-  { id: 'p7',  sentenceIds: ['s7'] },
-  { id: 'p8',  sentenceIds: ['s8', 's9', 's10'] },
-  { id: 'p9',  sentenceIds: ['s11'] },
-  { id: 'p10', sentenceIds: ['s12'] },
-  { id: 'p11', sentenceIds: ['s13'] },
-  { id: 'p12', sentenceIds: ['s14'] }
+  { id: 'p1', sentenceIds: ['s1'] },
+  { id: 'p2', sentenceIds: ['s2'] },
+  { id: 'p3', sentenceIds: ['s3'] },
+  { id: 'p4', sentenceIds: ['s4'] },
+  { id: 'p5', sentenceIds: ['s5'] },
+  { id: 'p6', sentenceIds: ['s6'] },
+  { id: 'p7', sentenceIds: ['s7'] },
+  { id: 'p8', sentenceIds: ['s8', 's9', 's10'] },
+  { id: 'p9', sentenceIds: ['s11', 's12', 's13', 's14'] }
 ]
 
 export const prideAndPrejudice: ListenBook = {
