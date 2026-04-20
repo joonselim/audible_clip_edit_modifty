@@ -515,14 +515,14 @@ function ClipToast({
             onClick={onShrink}
             aria-label="1 sentence"
           >
-            1
+            1 sent
           </ModeChip>
           <ModeChip
             active={clip.mode === 'two-sentences'}
             onClick={onExpand}
             aria-label="2 sentences"
           >
-            2
+            2 sent
           </ModeChip>
         </div>
         <button
@@ -549,7 +549,7 @@ function ModeChip({
   return (
     <button
       onClick={onClick}
-      className={`flex h-7 w-8 items-center justify-center rounded-full text-[13px] font-semibold leading-none active:scale-95 transition-colors ${
+      className={`flex h-7 items-center justify-center rounded-full px-2.5 text-[11px] font-semibold leading-none active:scale-95 transition-colors ${
         active
           ? 'bg-ink text-white'
           : 'border border-black/10 text-neutral-400 hover:bg-black/5'
