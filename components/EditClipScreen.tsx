@@ -141,6 +141,7 @@ export function EditClipScreen({
           onChange={next => setRange(next)}
           duration={book.chapter.duration}
           transcript={hasTranscript ? book.transcript : null}
+          mode={mode}
         />
 
         {/* Time range */}
@@ -287,7 +288,8 @@ function WaveformPane({
   anchorTime,
   onChange,
   duration,
-  transcript
+  transcript,
+  mode
 }: {
   start: number
   end: number
@@ -295,6 +297,7 @@ function WaveformPane({
   onChange: (r: { start: number; end: number }) => void
   duration: number
   transcript: BookTranscript | null
+  mode: ClipMode
 }) {
 
   // Dynamic zoom window + pan offset.
@@ -417,10 +420,11 @@ function WaveformPane({
     ;(e.target as Element).releasePointerCapture?.(e.pointerId)
   }
 
-  // Boundary labels for each handle (only when transcript exists
-  // AND the handle is at an actual sentence/paragraph boundary).
-  const startLabel = transcript ? startBoundaryLabel(transcript, start) : null
-  const endLabel = transcript ? endBoundaryLabel(transcript, end) : null
+  // Labels reflect the selected mode, not boundary detection — avoids the
+  // "always paragraph" problem when every sentence is its own paragraph.
+  const isParagraphMode = mode === 'paragraph'
+  const startLabel = transcript ? (isParagraphMode ? 'start of paragraph' : 'start of sentence') : null
+  const endLabel   = transcript ? (isParagraphMode ? 'end of paragraph'   : 'end of sentence')   : null
 
   // Bars are anchored to absolute time, so zooming in spaces them apart.
   const firstBarIdx = Math.max(0, Math.floor(windowStart * BARS_PER_SECOND) - 1)
@@ -616,45 +620,6 @@ function BoundaryTag({
   )
 }
 
-/* Boundary detection helpers -------------------------------
- * Each returns a human-readable label if the time `t` lands at
- * a known sentence/paragraph boundary (within ±0.6 s), else null.
- * --------------------------------------------------------*/
-
-const BOUNDARY_TOLERANCE = 0.6
-
-function startBoundaryLabel(t: BookTranscript, time: number): string | null {
-  // Paragraph start takes priority over sentence start.
-  for (const p of t.paragraphs) {
-    const firstS = t.sentences.find(s => s.id === p.sentenceIds[0])
-    if (firstS && Math.abs(firstS.startTime - time) <= BOUNDARY_TOLERANCE) {
-      return 'start of paragraph'
-    }
-  }
-  for (const s of t.sentences) {
-    if (Math.abs(s.startTime - time) <= BOUNDARY_TOLERANCE) {
-      return 'start of sentence'
-    }
-  }
-  return null
-}
-
-function endBoundaryLabel(t: BookTranscript, time: number): string | null {
-  // Paragraph end takes priority over sentence end.
-  for (const p of t.paragraphs) {
-    const lastSid = p.sentenceIds[p.sentenceIds.length - 1]
-    const lastS = t.sentences.find(s => s.id === lastSid)
-    if (lastS && Math.abs(lastS.endTime - time) <= BOUNDARY_TOLERANCE) {
-      return 'end of paragraph'
-    }
-  }
-  for (const s of t.sentences) {
-    if (Math.abs(s.endTime - time) <= BOUNDARY_TOLERANCE) {
-      return 'end of sentence'
-    }
-  }
-  return null
-}
 
 /* ----------------------------------------------------------
  * Misc
