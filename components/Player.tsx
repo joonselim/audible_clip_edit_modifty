@@ -51,7 +51,7 @@ export interface Clip {
 }
 
 const DEFAULT_MODE: ClipMode = 'two-sentences'
-const START_TIME = 45
+const START_TIME = 90
 
 /* ----------------------------------------------------------
  * Player
@@ -195,6 +195,17 @@ export function Player() {
     const t = window.setTimeout(() => setToastClipId(null), 4000)
     return () => window.clearTimeout(t)
   }, [toastClipId])
+
+  /* ----- Hint dismiss on click anywhere except [data-nohint] ----- */
+  useEffect(() => {
+    if (!showHint) return
+    const dismiss = (e: MouseEvent) => {
+      if ((e.target as HTMLElement).closest('[data-nohint]')) return
+      setShowHint(false)
+    }
+    document.addEventListener('click', dismiss)
+    return () => document.removeEventListener('click', dismiss)
+  }, [showHint])
 
   /* ----- Toast actions ----- */
   const widen = (direction: 'expand' | 'shrink') => {
@@ -386,6 +397,7 @@ export function Player() {
           <Back30 />
         </button>
         <button
+          data-nohint
           aria-label={isPlaying ? 'Pause' : 'Play'}
           onClick={() => setIsPlaying(p => !p)}
           className="flex h-[68px] w-[68px] items-center justify-center rounded-full bg-white text-ink shadow-lg active:scale-95"
@@ -427,25 +439,14 @@ export function Player() {
         />
       )}
 
-      {/* Onboarding hint — any tap anywhere dismisses */}
+      {/* Onboarding hint — dismisses on any click except [data-nohint] */}
       {showHint && (
-        <div
-          className="absolute inset-0 z-30"
-          onClick={() => {
-            setShowHint(false)
-            // Hint dismiss is the first user gesture — use it to unblock audio.
-            const a = audioRef.current
-            if (a) a.play().then(() => setIsPlaying(true)).catch(() => {})
-          }}
-        >
-          <div className="absolute bottom-[76px] right-4">
-            <div className="relative rounded-2xl bg-panel/70 px-4 py-3 ring-1 ring-white/10 backdrop-blur-sm">
-              <p className="text-[13.5px] font-semibold text-neutral-100 whitespace-nowrap">
-                Try clipping! ✂️
-              </p>
-              {/* Arrow pointing toward + Clip button */}
-              <div className="absolute -bottom-[5px] right-[28px] h-[10px] w-[10px] rotate-45 bg-[#161b22] ring-1 ring-white/10" />
-            </div>
+        <div className="absolute bottom-[76px] right-4 z-30 pointer-events-none">
+          <div className="relative rounded-2xl bg-panel/70 px-4 py-3 ring-1 ring-white/10 backdrop-blur-sm">
+            <p className="text-[13.5px] font-semibold text-neutral-100 whitespace-nowrap">
+              Try clipping! ✂️
+            </p>
+            <div className="absolute -bottom-[5px] right-[28px] h-[10px] w-[10px] rotate-45 bg-[#161b22] ring-1 ring-white/10" />
           </div>
         </div>
       )}
