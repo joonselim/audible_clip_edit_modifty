@@ -515,14 +515,14 @@ function ClipToast({
             onClick={onShrink}
             aria-label="1 sentence"
           >
-            1 sent
+            1 line
           </ModeChip>
           <ModeChip
             active={clip.mode === 'two-sentences'}
             onClick={onExpand}
             aria-label="2 sentences"
           >
-            2 sent
+            2 lines
           </ModeChip>
         </div>
         <button
