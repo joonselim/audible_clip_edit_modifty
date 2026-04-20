@@ -51,7 +51,7 @@ export interface Clip {
 }
 
 const DEFAULT_MODE: ClipMode = 'two-sentences'
-const START_TIME = 0 // trimmed audio starts at Mrs. Bennet's first line
+const START_TIME = 45
 
 /* ----------------------------------------------------------
  * Player
@@ -73,32 +73,9 @@ export function Player() {
   // reaches it — used to stop clip preview playback at the clip's end.
   const previewEndRef = useRef<number | null>(null)
 
-  /* ----- Playback clock -----
-   * Real audio: time and play-state are driven by the <audio> element.
-   * Browsers block autoplay without a prior gesture, so if play() is
-   * rejected we fall back to a paused state — the user can tap the
-   * big play button to start. Mocks without audioSrc fall back to a
-   * 1-Hz synthetic clock. */
-  useEffect(() => {
-    const a = audioRef.current
-    if (a) {
-      if (isPlaying) {
-        const p = a.play()
-        if (p && typeof p.catch === 'function') {
-          p.catch(() => setIsPlaying(false))
-        }
-      } else {
-        a.pause()
-      }
-      return
-    }
-    if (!isPlaying) return
-    const id = window.setInterval(() => {
-      setCurrentTime(t => Math.min(t + 1, book.chapter.duration))
-    }, 1000)
-    return () => window.clearInterval(id)
-  }, [isPlaying, book.chapter.duration])
-
+  /* ----- Audio setup (runs once on mount) -----
+   * Seek to START_TIME first, then attempt autoplay. Doing this in a
+   * single effect guarantees seek happens before play() is called. */
   useEffect(() => {
     const a = audioRef.current
     if (!a) return
@@ -122,11 +99,39 @@ export function Player() {
     }
     a.addEventListener('timeupdate', onTime)
     a.addEventListener('ended', onEnded)
+    // Kick off autoplay after seeking
+    const p = a.play()
+    if (p && typeof p.catch === 'function') {
+      p.catch(() => setIsPlaying(false))
+    }
     return () => {
       a.removeEventListener('timeupdate', onTime)
       a.removeEventListener('ended', onEnded)
     }
   }, [])
+
+  /* ----- Playback clock -----
+   * Subsequent play/pause toggles come through here.
+   * Mocks without audioSrc fall back to a 1-Hz synthetic clock. */
+  useEffect(() => {
+    const a = audioRef.current
+    if (a) {
+      if (isPlaying) {
+        const p = a.play()
+        if (p && typeof p.catch === 'function') {
+          p.catch(() => setIsPlaying(false))
+        }
+      } else {
+        a.pause()
+      }
+      return
+    }
+    if (!isPlaying) return
+    const id = window.setInterval(() => {
+      setCurrentTime(t => Math.min(t + 1, book.chapter.duration))
+    }, 1000)
+    return () => window.clearInterval(id)
+  }, [isPlaying, book.chapter.duration])
 
   /* Autoplay fallback — if the browser blocked initial play() (common
    * on Safari / mobile), the very next user gesture anywhere on the
@@ -260,6 +265,7 @@ export function Player() {
           ref={audioRef}
           src={book.audioSrc}
           preload="auto"
+          autoPlay
           className="hidden"
         />
       )}
